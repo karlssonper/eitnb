@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 import argparse
 
 parser = argparse.ArgumentParser(description="Eighty is the new black")
