@@ -7,18 +7,27 @@ parser.add_argument("-kws","--killwhitespaces", action="store_true",
                     help="Kill all whitespaces at the end of a line")
 parser.add_argument("-kbl","--killblanklines", action="store_true",
                     help="Kill consecutive blank new lines")
+parser.add_argument("-rt","--replacetabs", action="store_true",
+                    help="Replace tabs with whitespaces")
 parser.add_argument("-ns", "--nostats", action="store_true",
                     help="Print stats after run")
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="Output every line larger than specified width")
 parser.add_argument("-w", "--width", default = "80", type=int,
                     help="Allowed width")
+parser.add_argument("-ts", "--tabspace", default = "4", type=int,
+                    help="Number of whitespaces in a tab")
 args = parser.parse_args()
 
 w = args.width
 nw, nws, nbl = 0,0,0
 f = open(args.textfile)
-lines = f.read().split("\n")
+txt = f.read()
+numTabs = txt.count("\t")
+if args.replacetabs:
+    lines = txt.replace("\t", " " * args.tabspace).split("\n")
+else:
+    lines = txt.split("\n")
 f.close()
 rw = len(str(len(lines))) # row width
 removeLines = []
@@ -42,7 +51,7 @@ for row,line in enumerate(lines):
             # Print ending whitespaces as yellow
             print "%s:%s\033[93m%s\033[0m" %(rowStr,lines[row],"_"*(N-1))
 
-if args.killblanklines or args.killwhitespaces:
+if args.killblanklines or args.killwhitespaces or args.replacetabs:
     f = open(args.textfile, "w")
 
 prevBlank = False
@@ -54,7 +63,7 @@ for line in lines:
         nbl += 1
     prevBlank = not len(line)
 
-if not args.killblanklines and args.killwhitespaces:
+if not args.killblanklines and (args.killwhitespaces or args.replacetabs):
     for line in lines:
         f.write(line + "\n")
 
@@ -65,4 +74,5 @@ if not args.nostats:
         % (nws, len(lines), 100*nws/float(len(lines)))
     print "Number of consecutive blank lines: %i/%i (%.2f%%)" \
         % (nbl, len(lines), 100*nbl/float(len(lines)))
+    print "Number of tabs: %i" % numTabs
 
